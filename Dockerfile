@@ -36,4 +36,5 @@ USER 1001
 
 # TODO: Set the default CMD for the image
 # CMD ["/usr/libexec/s2i/usage"]
+CMD ["/usr/libexec/s2i/assemble"]
 CMD ["/usr/libexec/s2i/run"]

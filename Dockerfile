@@ -12,6 +12,10 @@ FROM openshift/base-centos7
 #      io.k8s.display-name="builder x.y.z" \
 #      io.openshift.expose-services="8080:http" \
 #      io.openshift.tags="builder,x.y.z,etc."
+LABEL io.k8s.description="Platform for test s2i 001" \
+      io.k8s.display-name="builder 0.0.1" \
+      io.openshift.expose-services="" \
+      io.openshift.tags="builder,0.0.1,etc."
 
 # TODO: Install required packages here:
 # RUN yum install -y ... && yum clean all -y

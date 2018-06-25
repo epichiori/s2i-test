@@ -1,119 +1,199 @@
-apiVerision: v1
+apiVersion: v1
 kind: Template
 metadata:
   name: test
   annotations:
-    openshift.io/display-name: "Test s2i application"
+    openshift.io/display-name: Test s2i application
     description: |-
       Test application to run from s2i generated template.
 
       Sample Repository: https://github.com/epichiori/s2i-test
-    openshift.io/long-description: >-
-      "This template rapresent a test to deploy s2i applications for developers"
-    iconClass: "icon-openshift"
-    tags: "wfp,test,s2i"
-    openshift.io/provider-display-name: "World Food Programme" 
-    openshift.io/documentation-url: "https://github.com/epichiori/s2i-test"
-  message: "Your admin credentials are ${ADMIN_USERNAME}:${ADMIN_PASSWORD}" 
+    openshift.io/long-description: This template rapresent a test to deploy s2i applications for developers
+    iconClass: icon-openshift
+    tags: wfp,test,s2i
+    openshift.io/provider-display-name: World Food Programme
+    openshift.io/documentation-url: https://github.com/epichiori/s2i-test
+  message: Your admin credentials are ${ADMIN_USERNAME}:${ADMIN_PASSWORD} 
 
 objects:
-- kind: Secret
-  apiVersion: v1
+
+- apiVersion: v1
+  kind: BuildConfig
   metadata:
-    name: test-config-secret
     annotations:
-      template.openshift.io/base64-expose-password: "{.data['password']}"
-  stringData:
-    password: bar
-
-- kind: Service
-  apiVersion: v1
-  metadata:
-    name: test
-    annotations:
-      template.openshift.io/expose-service_ip_port: "{.spec.clusterIP}:{.spec.ports[?(.name==\"web\")].port}"
-  spec:
-    ports:
-    - name: "web"
-      port: 8080
-
-- kind: Route
-  apiVersion: v1
-  metadata:
-    name: test
-    annotations:
-      template.openshift.io/expose-uri: "http://{.spec.host}{.spec.path}"
-  spec:
-    path: /test 
-    to:
-      name: test
-
-- kind: BuildConfig
-  apiVersion: v1
-  metadata:
-    name: test
-  spec:
-    runPolicy: "Serial" 
-## GIT source
-    source:
-      git:
-        uri: 'git@github.com:epichiori/s2i-test.git'
-        ref: master
-    type: Git
-## s2i build strategy 
-    strategy:
-      sourceStrategy:
-        from:
-          kind: "ImageStreamTag"
-          name: "openshift:test"
-      incremental: true
-## remove for production
-      env:
-        - name: "BUILD_LOGLEVEL"
-          value: "3"
-    output:
-      to:
-        kind: ImageStreamTag
-        name: 'test:latest'
-      imageLabels:
-      - name: "vendor"
-        value: "WPF"
-
-- kind: DeploymentConfig
-  apiVersion: v1
-  metadata:
+      openshift.io/generated-by: OpenShiftNewApp
     labels:
       app: test
     name: test
   spec:
-    replicas: 1 
-    revisionHistoryLimit: 2
-    strategy: 
-      type: Rolling
-    paused: false 
-    minReadySeconds: 0 
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: test:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+## GIT source
+    source:
+      git:
+        uri: https://github.com/epichiori/s2i-test.git
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: base-centos7:latest
+      type: Docker
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: ZczjqshOU8ljdQdN_H2Y
+      type: GitHub
+    - generic:
+        secret: uGOo8xiXdsj2ngsabFMH
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
 
-    template: 
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/image.dockerRepositoryCheck: 2018-06-25T11:54:01Z
+    creationTimestamp: null
+    generation: 2
+    labels:
+      app: test
+    name: base-centos7
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: openshift/base-centos7
+      from:
+        kind: DockerImage
+        name: 172.30.1.1:5000/myproject/base-centos7:latest
+      generation: 2
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+  status:
+    dockerImageRepository: ""
+
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: test
+    name: test
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: 172.30.1.1:5000/myproject/test:latest
+      generation: null
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: ""
+  status:
+    dockerImageRepository: ""
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    generation: 1
+    labels:
+      app: test
+    name: test
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: test
+      deploymentconfig: test
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
       metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
         labels:
-          name: test
+          app: test
+          deploymentconfig: test
       spec:
         containers:
-          - name: test
-            image: 'openshift:test'
-            ports:
-              - containerPort: 8080
-                protocol: "TCP"
+        - image: 172.30.1.1:5000/myproject/test@sha256:0a5f38013c62df17b34fb2d5a0ae82b9514990cffdb960dfec89938a19431de3
+          imagePullPolicy: Always
+          name: test
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
     triggers:
-      - type: "ConfigChange" 
-      - type: "ImageChange" 
-        imageChangeParams:
-          automatic: true
-          containerNames:
-            - test
-          from:
-            kind: ImageStreamTag
-            name: 'openshift:test'
-        
-parameters:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - test
+        from:
+          kind: ImageStreamTag
+          name: test:latest
+          namespace: myproject
+      type: ImageChange
 
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: test
+    name: test
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: test
+      deploymentconfig: test
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}

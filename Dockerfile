@@ -17,7 +17,7 @@ LABEL io.k8s.description="Platform for test s2i" \
       io.k8s.display-name="builder 0.0.1" \
       io.openshift.expose-services="8080:http" \
       io.openshift.tags="builder,1.0.1,etc." \
-      io.openshift.s2i.scripts-url="iimage:///usr/libexec/s2i" 
+      io.openshift.s2i.scripts-url="image:///usr/libexec/s2i" 
 
 # TODO: Install required packages here:
 # RUN yum install -y ... && yum clean all -y

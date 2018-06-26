@@ -36,6 +36,7 @@ objects:
 ## GIT source
     source:
       git:
+#        uri: https://github.com/epichiori/s2i-test.git
         uri: https://github.com/epichiori/test-src.git
       type: Git
 ## s2i build strategy 
@@ -51,9 +52,9 @@ objects:
     - github:
         secret: ZczjqshOU8ljdQdN_H2Y
       type: GitHub
-#    - generic:
-#        secret: uGOo8xiXdsj2ngsabFMH
-#      type: Generic
+    - generic:
+        secret: uGOo8xiXdsj2ngsabFMH
+      type: Generic
     - type: ConfigChange
     - imageChange: {}
       type: ImageChange
@@ -63,6 +64,34 @@ objects:
 - apiVersion: v1
   kind: ImageStream
   metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    generation: 2
+    labels:
+      app: test
+    name: base-centos7
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: openshift/base-centos7
+      from:
+        kind: DockerImage
+        name: 172.30.1.1:5000/myproject/base-centos7:latest
+      generation: 2
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+  status:
+    dockerImageRepository: ""
+
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
     generation: 1
     labels:
       app: test
@@ -70,12 +99,24 @@ objects:
   spec:
     lookupPolicy:
       local: false
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: 172.30.1.1:5000/myproject/test:latest
+      generation: null
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: ""
   status:
     dockerImageRepository: ""
 
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
     generation: 1
     labels:
       app: test
@@ -135,6 +176,8 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
     labels:
       app: test
     name: test

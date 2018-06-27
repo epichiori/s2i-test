@@ -38,20 +38,19 @@ objects:
     output:
       to:
         kind: ImageStreamTag
-#        namespace: openshift ### MONITO!
         name: test:latest
     runPolicy: Serial
 ## GIT source
     source:
       git:
-        uri: https://github.com/epichiori/test-src.git
+        uri: "${{GIT_SOURCE}}"
       type: Git
 ## s2i build strategy 
     strategy:
       sourceStrategy:
         env:
           - name: BUILD_LOGLEVEL
-            value: 5
+            value: '5'
         from:
           kind: ImageStreamTag
           namespace: openshift
@@ -155,4 +154,9 @@ objects:
       name: test
       weight: 100
     wildcardPolicy: None
-    
+
+parameters:
+  - name: GIT_SOURCE
+    description: 'The Git repository where resides custom source code to build'
+    value: https://github.com/epichiori/test-src.git
+

@@ -26,8 +26,6 @@ objects:
   spec:
     lookupPolicy:
       local: false
-  status:
-    dockerImageRepository: ""
 
 - apiVersion: v1
   kind: BuildConfig
@@ -37,14 +35,11 @@ objects:
     name: test
   spec:
     failedBuildsHistoryLimit: 5
-    nodeSelector: null
     output:
       to:
         kind: ImageStreamTag
-        namespace: openshift
+#        namespace: openshift ### MONITO!
         name: test:latest
-    postCommit: {}
-    resources: {}
     runPolicy: Serial
 ## GIT source
     source:
@@ -54,19 +49,17 @@ objects:
 ## s2i build strategy 
     strategy:
       sourceStrategy:
+        env:
+          - name: BUILD_LOGLEVEL
+            value: 5
         from:
           kind: ImageStreamTag
           namespace: openshift
           name: 'test:latest'
+        forcePull: true
       incremental: true
     successfulBuildsHistoryLimit: 5
     triggers:
-    - github:
-        secret: ZczjqshOU8ljdQdN_H2Y
-      type: GitHub
-#    - generic:
-#        secret: uGOo8xiXdsj2ngsabFMH
-#      type: Generic
     - type: ConfigChange
     - imageChange: {}
       type: ImageChange
@@ -98,22 +91,13 @@ objects:
       type: Rolling
     template:
       metadata:
-        annotations:
-          openshift.io/generated-by: OpenShiftNewApp
         labels:
           app: test
           deploymentconfig: test
       spec:
         containers:
-        - image: 172.30.1.1:5000/myproject/test@sha256:0a5f38013c62df17b34fb2d5a0ae82b9514990cffdb960dfec89938a19431de3
-          imagePullPolicy: Always
+        - imagePullPolicy: Always
           name: test
-          ports:
-          - containerPort: 8080
-            protocol: TCP
-          resources: {}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         schedulerName: default-scheduler
@@ -129,7 +113,6 @@ objects:
         from:
           kind: ImageStreamTag
           name: test:latest
-          namespace: myproject
       type: ImageChange
 
 - apiVersion: v1
@@ -151,3 +134,25 @@ objects:
     type: ClusterIP
   status:
     loadBalancer: {}
+
+- apiVersion: v1
+  kind: Route
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: test
+    name: test
+  spec:
+    host: www.test.org
+    path: /test/test-app/index.html
+    port:
+      targetPort: 8080-tcp
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: test
+      weight: 100
+    wildcardPolicy: None
+    

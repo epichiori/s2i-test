@@ -41,4 +41,4 @@ USER 1001
 EXPOSE 8080
 
 # TODO: Set the default CMD for the image
-# CMD ["/usr/libexec/s2i/usage"]
+CMD ["/usr/libexec/s2i/usage"]

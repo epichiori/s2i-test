@@ -142,8 +142,9 @@ objects:
       app: test
     name: test
   spec:
-    host: www.test.org
-    path: /test/test-app/index.html
+    host: test.127.0.0.1.nip.io
+#    host: www.test.com
+    path: /test/test-app/
     port:
       targetPort: 8080-tcp
     tls:

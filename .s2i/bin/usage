@@ -1,5 +1,16 @@
 #!/bin/bash -e
 cat <<EOF
+ __          ________ _____
+ \\ \\        / /  ____|  __ \\
+  \\ \\  /\\  / /| |__  | |__) |
+   \\ \\/  \\/ / |  __| |  ___/
+    \\  /\\  /  | |    | |
+     \\/  \\/   |_|    |_|
+
+     World Food Programme
+
+
+
 This is the test S2I image:
 To use it, install S2I: https://github.com/openshift/source-to-image
 

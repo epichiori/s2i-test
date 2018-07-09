@@ -21,8 +21,8 @@ objects:
   metadata:
     generation: 1
     labels:
-      app: test
-    name: test
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
   spec:
     lookupPolicy:
       local: false
@@ -31,14 +31,14 @@ objects:
   kind: BuildConfig
   metadata:
     labels:
-      app: test
-    name: test
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
   spec:
     failedBuildsHistoryLimit: 5
     output:
       to:
         kind: ImageStreamTag
-        name: test:latest
+        name: ${APPLICATION_NAME}:latest
     runPolicy: Serial
 ## GIT source
     source:
@@ -70,14 +70,14 @@ objects:
   metadata:
     generation: 1
     labels:
-      app: test
-    name: test
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
   spec:
     replicas: 1
     revisionHistoryLimit: 10
     selector:
-      app: test
-      deploymentconfig: test
+      app: ${APPLICATION_NAME}
+      deploymentconfig: ${APPLICATION_NAME}
     strategy:
       activeDeadlineSeconds: 21600
       resources: {}
@@ -91,12 +91,12 @@ objects:
     template:
       metadata:
         labels:
-          app: test
-          deploymentconfig: test
+          app: ${APPLICATION_NAME}
+          deploymentconfig: ${APPLICATION_NAME}
       spec:
         containers:
-        - imagePullPolicy: Always
-          name: test
+#        - imagePullPolicy: Always
+        - name: test
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         schedulerName: default-scheduler
@@ -111,15 +111,15 @@ objects:
         - test
         from:
           kind: ImageStreamTag
-          name: test:latest
+          name: ${APPLICATION_NAME}:latest
       type: ImageChange
 
 - apiVersion: v1
   kind: Service
   metadata:
     labels:
-      app: test
-    name: test
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
   spec:
     ports:
     - name: 8080-tcp
@@ -127,8 +127,8 @@ objects:
       protocol: TCP
       targetPort: 8080
     selector:
-      app: test
-      deploymentconfig: test
+      app: ${APPLICATION_NAME}
+      deploymentconfig: ${APPLICATION_NAME}
     sessionAffinity: None
     type: ClusterIP
   status:
@@ -139,11 +139,10 @@ objects:
   metadata:
     creationTimestamp: null
     labels:
-      app: test
-    name: test
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
   spec:
-    host: test.127.0.0.1.nip.io
-#    host: www.test.com
+    host: ${APPLICATION_NAME}.127.0.0.1.nip.io
     path: /test/test-app/
     port:
       targetPort: 8080-tcp
@@ -152,12 +151,29 @@ objects:
       termination: edge
     to:
       kind: Service
-      name: test
+      name: ${APPLICATION_NAME}
       weight: 100
     wildcardPolicy: None
 
 parameters:
+  - name:		APPLICATION_NAME
+    display name:	Application Name
+    description:	The name for the application.
+    required:		true
+    value:		test
+
   - name: GIT_SOURCE
+    display name: Source code GIT repository URL
     description: 'The Git repository where resides custom source code to build'
     value: https://github.com/epichiori/test-src.git
+    required: true
+
+#   - collection: prova
+#    options:
+#      inputMappings:
+#      - fieldName: a
+#        value: a-value
+#      - fieldName: b
+#        value: b-value
+
 
